@@ -129,6 +129,7 @@ func AllBooks(w http.ResponseWriter, r *http.Request) {
 
 	// Получаем квери параметры из URL
 	query := r.URL.Query()
+	authorsFilters := query["authors"]
 	limit := query.Get("limit")
 	titleFilter := query.Get("title")
 	sort := query.Get("sort")
@@ -139,6 +140,21 @@ func AllBooks(w http.ResponseWriter, r *http.Request) {
 		for _, book := range Books {
 			if strings.Contains(book.Title, titleFilter) {
 				filteredBooks = append(filteredBooks, book)
+			}
+		}
+	} else {
+		filteredBooks = Books
+	}
+
+	if len(authorsFilters) > 0 {
+		for _, book := range Books {
+			for _, authorsFilter := range authorsFilters {
+				for _, author := range book.Authors {
+					if strings.Contains(author, authorsFilter) {
+						filteredBooks = append(filteredBooks, book)
+						break
+					}
+				}
 			}
 		}
 	} else {

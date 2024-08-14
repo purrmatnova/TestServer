@@ -1,134 +1,129 @@
----
-openapi: "3.0.0"
+openapi: 3.0.0
 info:
-  title: "Book API"
-  description: "API для управления книгами"
-  version: "1.0.0"
+  title: Book API
+  description: API для управления книгами
+  version: 1.0.0
 servers:
-  - url: "http://127.0.0.1:8080"
+  - url: http://127.0.0.1:8080
 paths:
   /book:
     get:
-      summary: "Get all books"
+      summary: Получить книгу по ID
+      description: Возвращает книгу с указанным ID
       parameters:
-        - name: "limit"
-          in: "query"
-          description: "The maximum number of books to return"
-          required: "false"
-          type: "integer"
-        - name: "title"
-          in: "query"
-          description: "Filter books by title"
-          required: "false"
-          type: "string"
-      responses:
-        200:
-          description: "Successful operation"
+        - in: query
+          name: id
+          required: true
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Book"
-        400:
-          description: "Invalid limit parameter"
-        500:
-          description: "Internal server error"
+            type: integer
+      responses:
+        '200':
+          description: Книга найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Книга не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
-      summary: "Add a new book"
-      parameters:
-        - name: "book"
-          in: "body"
-          description: "The book object to add"
-          required: "true"
-          schema:
-            $ref: "#/definitions/Book"
+      summary: Добавить новую книгу
+      description: Создает новую книгу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
       responses:
-        200:
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Book"
-        400:
-          description: "Invalid request body"
-        500:
-          description: "Internal server error"
-  /book/{id}:
-    get:
-      summary: "Get a book by ID"
-      parameters:
-        - name: "id"
-          in: "path"
-          description: "The ID of the book to retrieve"
-          required: "true"
-          type: "integer"
-      responses:
-        200:
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Book"
-        400:
-          description: "Invalid ID parameter"
-        404:
-          description: "Book not found"
-        500:
-          description: "Internal server error"
+        '201':
+          description: Книга создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
-      summary: "Update a book by ID"
-      parameters:
-        - name: "id"
-          in: "path"
-          description: "The ID of the book to update"
-          required: "true"
-          type: "integer"
-        - name: "book"
-          in: "body"
-          description: "The updated book object"
-          required: "true"
-          schema:
-            $ref: "#/definitions/Book"
+      summary: Обновить книгу
+      description: Обновляет существующую книгу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
       responses:
-        200:
-          description: "Successful operation"
-        400:
-          description: "Invalid ID parameter or request body"
-        500:
-          description: "Internal server error"
+        '200':
+          description: Книга обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
-      summary: "Delete a book by ID"
+      summary: Удалить книгу
+      description: Удаляет книгу с указанным ID
       parameters:
-        - name: "id"
-          in: "path"
-          description: "The ID of the book to delete"
-          required: "true"
-          type: "integer"
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
       responses:
-        204:
-          description: "Successful operation"
-        400:
-          description: "Invalid ID parameter"
-        404:
-          description: "Book not found"
-        500:
-          description: "Internal server error"
+        '204':
+          description: Книга удалена
+        '404':
+          description: Книга не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /books:
     get:
-      summary: "Get all books"
+      summary: Получить все книги
+      description: Возвращает список всех книг
       responses:
-        200:
-          description: "Successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Book"
-definitions:
-  Book:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      title:
-        type: "string"
-      authors:
-        type: "array"
-        items:
-          type: "string"
-      year:
-        type: "integer"
+        '200':
+          description: Список книг
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        authors:
+          type: array
+          items:
+            type: string
+        year:
+          type: integer
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: string
+
