@@ -129,8 +129,9 @@ func AllBooks(w http.ResponseWriter, r *http.Request) {
 
 	// Получаем квери параметры из URL
 	query := r.URL.Query()
-	authorsFilters := query["authors"]
+	authorsFilter := query.Get("authors")
 	limit := query.Get("limit")
+	year := query.Get("year")
 	titleFilter := query.Get("title")
 	sort := query.Get("sort")
 
@@ -145,20 +146,39 @@ func AllBooks(w http.ResponseWriter, r *http.Request) {
 	} else {
 		filteredBooks = Books
 	}
+	// Применяем фильтрацию по полю Year, если параметр year задан
+	if year != "" {
+		yearInt, err := strconv.Atoi(year)
+		if err != nil {
+			handleError(w, http.StatusBadRequest, err)
+			return
+		}
 
-	if len(authorsFilters) > 0 {
-		for _, book := range Books {
-			for _, authorsFilter := range authorsFilters {
-				for _, author := range book.Authors {
-					if strings.Contains(author, authorsFilter) {
-						filteredBooks = append(filteredBooks, book)
+		var filteredByYearBooks []Book
+		for _, book := range filteredBooks {
+			if book.Year == yearInt {
+				filteredByYearBooks = append(filteredByYearBooks, book)
+			}
+		}
+		filteredBooks = filteredByYearBooks
+	}
+	// Применяем фильтрацию по авторам, если параметр authorsFilter задан
+	if authorsFilter != "" {
+		authors := strings.Split(authorsFilter, ",")
+		var booksWithAuthors []Book
+		addedBooks := make(map[int]bool) // Мапа для отслеживания добавленных книг по их ID
+		for _, book := range filteredBooks {
+			for _, author := range book.Authors {
+				for _, filter := range authors {
+					if strings.Contains(author, filter) && !addedBooks[book.Id] {
+						booksWithAuthors = append(booksWithAuthors, book)
+						addedBooks[book.Id] = true
 						break
 					}
 				}
 			}
 		}
-	} else {
-		filteredBooks = Books
+		filteredBooks = booksWithAuthors
 	}
 
 	// Применяем сортировку по полю Id, если параметр sort равен "asc" или "desc"
@@ -223,7 +243,22 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Books[book.Id] = book
+	// Найти индекс книги в срезе по ее Id
+	index := -1
+	for i, b := range Books {
+		if b.Id == book.Id {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		// Книга не найдена, добавить новую книгу в срез
+		Books = append(Books, book)
+	} else {
+		// Обновить существующую книгу в срезе
+		Books[index] = book
+	}
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
