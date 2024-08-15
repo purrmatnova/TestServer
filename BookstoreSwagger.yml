@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Book API
   description: API для управления книгами
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: http://127.0.0.1:8080
 paths:
@@ -94,7 +94,44 @@ paths:
   /books:
     get:
       summary: Получить все книги
-      description: Возвращает список всех книг
+      description: Возвращает список всех книг.
+      parameters:
+        - in: query
+          name: authors
+          description: Фильтрация по году автору книги.
+            Параметры передаются через запятую, в случае, если авторов несколько
+          required: false
+          schema:
+            type: string
+            example: Мэтт Батчер,Мэтт Фарина
+        - in: query
+          name: year
+          description: Фильтрация по году издания книги
+          required: false
+          schema:
+            type: string
+            example: 2016
+        - in: query
+          name: title
+          description: Фильтрация по названию книги
+          required: false
+          schema:
+            type: string
+            example: Go на практике
+        - in: query
+          name: limit
+          description: Количество книг
+          required: false
+          schema:
+            type: string
+            example: 3
+        - in: query
+          name: sort
+          description: Сортировка по id книги в возрастающем и убывающем порядке
+          required: false
+          schema:
+            type: string
+            example: desc
       responses:
         '200':
           description: Список книг
@@ -104,6 +141,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Book'
+    post:
+      summary: Добавить несколько новых книг
+      description: Создает новые книги
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Книги созданы
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Book:
@@ -111,14 +173,20 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         title:
           type: string
+          example: Go на практике
         authors:
           type: array
           items:
             type: string
+            example: [ Мэтт Батчер,Мэтт Фарина ]
         year:
           type: integer
+          example: 2016
+
+
     Error:
       type: object
       properties:
@@ -126,4 +194,5 @@ components:
           type: string
         status:
           type: string
+
 
