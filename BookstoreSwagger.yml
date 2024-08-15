@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: Book API
+  description: API для управления книгами
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /book:
+    get:
+      summary: Получить книгу по ID
+      description: Возвращает книгу с указанным ID
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Книга найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Книга не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Добавить новую книгу
+      description: Создает новую книгу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '201':
+          description: Книга создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Обновить книгу
+      description: Обновляет существующую книгу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Книга обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Удалить книгу
+      description: Удаляет книгу с указанным ID
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Книга удалена
+        '404':
+          description: Книга не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /books:
+    get:
+      summary: Получить все книги
+      description: Возвращает список всех книг
+      responses:
+        '200':
+          description: Список книг
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        authors:
+          type: array
+          items:
+            type: string
+        year:
+          type: integer
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: string
+
